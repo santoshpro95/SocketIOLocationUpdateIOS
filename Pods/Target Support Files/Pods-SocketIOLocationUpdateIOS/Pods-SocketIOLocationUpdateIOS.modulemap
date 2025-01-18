@@ -1,0 +1,6 @@
+framework module Pods_SocketIOLocationUpdateIOS {
+  umbrella header "Pods-SocketIOLocationUpdateIOS-umbrella.h"
+
+  export *
+  module * { export * }
+}
