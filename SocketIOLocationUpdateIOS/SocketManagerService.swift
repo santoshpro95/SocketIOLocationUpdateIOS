@@ -15,7 +15,12 @@ class SocketManagerService {
     private var socket: SocketIOClient
 
     private init() {
-        manager = SocketManager(socketURL: URL(string: "http://192.168.1.103:3003")!, config: [.log(true), .compress])
+        manager = SocketManager(socketURL: URL(string: "http://192.168.1.103:3003")!, config: [
+            .log(true),
+            .reconnects(true),
+            .reconnectWait(10),
+            .reconnectAttempts(5)
+        ])
         socket = manager.defaultSocket
     }
     
@@ -24,17 +29,24 @@ class SocketManagerService {
             print("Socket connected!")
         }
         
-        socket.on(clientEvent: .disconnect) { (data, ack) in
-            print("Socket disconnected!")
+        socket.on(clientEvent: .disconnect) { data, ack in
+            print("Socket disconnected, trying to reconnect...")
+            self.reconnect()
         }
         
         // Add other event listeners if needed.
-        socket.on("customEvent") { (data, ack) in
+        socket.on("message") { (data, ack) in
             print("Received event: \(data)")
         }
         
         socket.connect()
     }
+    
+    func reconnect() {
+          if socket.status != .connected {
+              socket.connect()
+          }
+      }
     
     func disconnect() {
         socket.disconnect()
